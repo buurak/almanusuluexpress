@@ -1,207 +1,197 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harcama Takip</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .card {
-            margin-bottom: 1.5rem;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <div class="container py-4">
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <%= error %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <% } %>
-        <h1 class="text-center mb-4">
-            Harcama Takip
-            <form action="/sifirla" method="POST" class="d-inline ms-2">
-                <button type="submit" class="btn btn-danger btn-sm" 
-                        onclick="return confirm('Tüm veriler silinecek. Emin misiniz?')">
-                    Tümünü Sıfırla
-                </button>
-            </form>
-        </h1>
-        
-        <div class="row">
-            <!-- Sol Kolon -->
-            <div class="col-md-6 mb-4">
-                <!-- Kişi Ekleme -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Kişi Ekle</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="/kisi-ekle" method="POST" class="d-flex gap-2">
-                            <input type="text" name="isim" class="form-control" placeholder="Kişi adı" required>
-                            <button type="submit" class="btn btn-primary">Ekle</button>
-                        </form>
-                    </div>
-                </div>
+<%- include('layout/header', { title: 'Harcama Takip' }) %>
 
-                <!-- Harcama Ekleme -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Harcama Ekle</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="/harcama-ekle" method="POST">
-                            <div class="form-group">
-                                <label class="form-label">Harcamayı Yapanlar</label>
-                                <div class="border rounded p-3">
-                                    <% kisiler.forEach(kisi => { %>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                   name="kisi" value="<%= kisi %>" 
-                                                   id="odeyenKisi<%= kisi %>">
-                                            <label class="form-check-label" for="odeyenKisi<%= kisi %>">
-                                                <%= kisi %>
-                                            </label>
-                                        </div>
-                                    <% }); %>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Harcamaya Katılacaklar</label>
-                                <div class="border rounded p-3">
-                                    <% kisiler.forEach(kisi => { %>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                   name="katilimcilar" value="<%= kisi %>" 
-                                                   id="kisi<%= kisi %>" checked>
-                                            <label class="form-check-label" for="kisi<%= kisi %>">
-                                                <%= kisi %>
-                                            </label>
-                                        </div>
-                                    <% }); %>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Açıklama</label>
-                                <input type="text" name="aciklama" class="form-control" placeholder="Harcama açıklaması" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Tutar</label>
-                                <input type="number" name="tutar" step="0.01" class="form-control" placeholder="Tutar" required>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">Harcama Ekle</button>
-                        </form>
-                    </div>
+<div class="container py-4">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    <h1 class="text-center mb-4">
+        Harcama Takip
+        <form action="/sifirla" method="POST" class="d-inline ms-2">
+            <button type="submit" class="btn btn-danger btn-sm" 
+                    onclick="return confirm('Tüm veriler silinecek. Emin misiniz?')">
+                Tümünü Sıfırla
+            </button>
+        </form>
+    </h1>
+    
+    <div class="row">
+        <!-- Sol Kolon -->
+        <div class="col-md-6 mb-4">
+            <!-- Kişi Ekleme -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Kişi Ekle</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/kisi-ekle" method="POST" class="d-flex gap-2" onsubmit="trackPersonAdd(this.isim.value)">
+                        <input type="text" name="isim" class="form-control" placeholder="Kişi adı" required>
+                        <button type="submit" class="btn btn-primary">Ekle</button>
+                    </form>
                 </div>
             </div>
 
-            <!-- Sağ Kolon -->
-            <div class="col-md-6">
-                <!-- Özet Bilgiler -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Özet</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-3">
-                            <span>Toplam Harcama:</span>
-                            <strong><%= hesaplamalar.toplamHarcama.toFixed(2) %> TL</strong>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Kişi Başı Harcama:</span>
-                            <strong><%= hesaplamalar.kisiBasiHarcama.toFixed(2) %> TL</strong>
-                        </div>
-                    </div>
+            <!-- Harcama Ekleme -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Harcama Ekle</h5>
                 </div>
-
-                <!-- Kişisel Harcamalar -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Kişisel Harcamalar</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <% for (const [kisi, tutar] of Object.entries(hesaplamalar.kisiHarcamalari)) { %>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <%= kisi %>
-                                    <span class="badge bg-primary rounded-pill"><%= tutar.toFixed(2) %> TL</span>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Borç Durumu -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Borç Durumu</h5>
-                    </div>
-                    <div class="card-body">
-                        <% if (hesaplamalar.borclar.length === 0) { %>
-                            <p class="text-muted mb-0">Herhangi bir borç bulunmamaktadır.</p>
-                        <% } else { %>
-                            <div class="list-group">
-                                <% hesaplamalar.borclar.forEach(borc => { %>
-                                    <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span><%= borc.alici %> ➜ <%= borc.verici %></span>
-                                            <span class="badge bg-danger rounded-pill"><%= borc.miktar.toFixed(2) %> TL</span>
-                                        </div>
+                <div class="card-body">
+                    <form action="/harcama-ekle" method="POST" onsubmit="trackExpenseAdd(this.tutar.value)">
+                        <div class="form-group">
+                            <label class="form-label">Harcamayı Yapanlar</label>
+                            <div class="border rounded p-3">
+                                <% kisiler.forEach(kisi => { %>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="kisi" value="<%= kisi %>" 
+                                               id="odeyenKisi<%= kisi %>">
+                                        <label class="form-check-label" for="odeyenKisi<%= kisi %>">
+                                            <%= kisi %>
+                                        </label>
                                     </div>
                                 <% }); %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Harcamaya Katılacaklar</label>
+                            <div class="border rounded p-3">
+                                <% kisiler.forEach(kisi => { %>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="katilimcilar" value="<%= kisi %>" 
+                                               id="kisi<%= kisi %>" checked>
+                                        <label class="form-check-label" for="kisi<%= kisi %>">
+                                            <%= kisi %>
+                                        </label>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Açıklama</label>
+                            <input type="text" name="aciklama" class="form-control" placeholder="Harcama açıklaması" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tutar</label>
+                            <input type="number" 
+                                   name="tutar" 
+                                   step="1" 
+                                   min="1" 
+                                   max="1000000"
+                                   class="form-control" 
+                                   placeholder="Tutar" 
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Harcama Ekle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Kolon -->
+        <div class="col-md-6">
+            <!-- Özet Bilgiler -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Özet</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Toplam Harcama:</span>
+                        <strong><%= hesaplamalar.toplamHarcama.toFixed(2) %> TL</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Kişi Başı Harcama:</span>
+                        <strong><%= hesaplamalar.kisiBasiHarcama.toFixed(2) %> TL</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kişisel Harcamalar -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Kişisel Harcamalar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <% for (const [kisi, tutar] of Object.entries(hesaplamalar.kisiHarcamalari)) { %>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <%= kisi %>
+                                <span class="badge bg-primary rounded-pill"><%= tutar.toFixed(2) %> TL</span>
                             </div>
                         <% } %>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Harcama Tablosu -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Harcama Geçmişi</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Açıklama</th>
-                                <th>Tutar</th>
-                                <th>Ödeyenler</th>
-                                <th>Katılımcılar</th>
-                                <th>Tarih</th>
-                                <th>Düzenle</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% harcamalar.forEach((harcama, index) => { %>
-                                <tr style="cursor: pointer" onclick="window.location.href='/harcama/<%= index %>'">
-                                    <td><%= harcama.aciklama %></td>
-                                    <td><%= harcama.tutar.toFixed(2) %> TL</td>
-                                    <td><small class="text-muted"><%= harcama.odeyenler.join(', ') %></small></td>
-                                    <td><small class="text-muted"><%= harcama.katilimcilar.join(', ') %></small></td>
-                                    <td><%= harcama.tarih.toLocaleDateString() %></td>
-                                    <td>
-                                        <a href="/harcama-duzenle/<%= index %>" 
-                                           class="btn btn-sm btn-outline-primary"
-                                           onclick="event.stopPropagation()">
-                                            Düzenle
-                                        </a>
-                                    </td>
-                                </tr>
+            <!-- Borç Durumu -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Borç Durumu</h5>
+                </div>
+                <div class="card-body">
+                    <% if (hesaplamalar.borclar.length === 0) { %>
+                        <p class="text-muted mb-0">Herhangi bir borç bulunmamaktadır.</p>
+                    <% } else { %>
+                        <div class="list-group">
+                            <% hesaplamalar.borclar.forEach(borc => { %>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><%= borc.alici %> ➜ <%= borc.verici %></span>
+                                        <span class="badge bg-danger rounded-pill"><%= borc.miktar.toFixed(2) %> TL</span>
+                                    </div>
+                                </div>
                             <% }); %>
-                        </tbody>
-                    </table>
+                        </div>
+                    <% } %>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+    <!-- Harcama Tablosu -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Harcama Geçmişi</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Açıklama</th>
+                            <th>Tutar</th>
+                            <th>Ödeyenler</th>
+                            <th>Katılımcılar</th>
+                            <th>Tarih</th>
+                            <th>Düzenle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% harcamalar.forEach((harcama, index) => { %>
+                            <tr style="cursor: pointer" onclick="window.location.href='/harcama/<%= index %>'">
+                                <td><%= harcama.aciklama %></td>
+                                <td><%= harcama.tutar.toFixed(2) %> TL</td>
+                                <td><small class="text-muted"><%= harcama.odeyenler.join(', ') %></small></td>
+                                <td><small class="text-muted"><%= harcama.katilimcilar.join(', ') %></small></td>
+                                <td><%= harcama.tarih.toLocaleDateString() %></td>
+                                <td>
+                                    <a href="/harcama-duzenle/<%= index %>" 
+                                       class="btn btn-sm btn-outline-primary"
+                                       onclick="event.stopPropagation()">
+                                        Düzenle
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('layout/footer') %> 

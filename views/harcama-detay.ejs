@@ -7,96 +7,133 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .card { margin-bottom: 1.5rem; }
+        .detail-row { margin-bottom: 0.5rem; }
+        .badge.large { font-size: 1rem; padding: 0.5rem 1rem; }
     </style>
 </head>
 <body class="bg-light">
     <div class="container py-4">
+        <!-- Üst Başlık ve Butonlar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Harcama Detayı</h1>
+            <h2 class="mb-0"><%= harcama.aciklama %></h2>
             <div>
                 <a href="/" class="btn btn-outline-secondary me-2">Geri Dön</a>
                 <a href="/harcama-duzenle/<%= harcamaId %>" class="btn btn-primary">Düzenle</a>
             </div>
         </div>
 
-        <!-- Harcama Bilgileri -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Harcama Bilgileri</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Açıklama:</strong> <%= harcama.aciklama %></p>
-                        <p><strong>Tutar:</strong> <%= harcama.tutar.toFixed(2) %> TL</p>
-                        <p><strong>Tarih:</strong> <%= harcama.tarih.toLocaleDateString() %></p>
+        <div class="row">
+            <!-- Sol Kolon -->
+            <div class="col-md-6">
+                <!-- Temel Bilgiler -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Harcama Bilgileri</h5>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Ödeyenler:</strong> <%= harcama.odeyenler.join(', ') %></p>
-                        <p><strong>Katılımcılar:</strong> <%= harcama.katilimcilar.join(', ') %></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Özet -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Özet</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between mb-3">
-                    <span>Toplam Harcama:</span>
-                    <strong><%= hesaplamalar.toplamHarcama.toFixed(2) %> TL</strong>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <span>Kişi Başı Harcama:</span>
-                    <strong><%= hesaplamalar.kisiBasiHarcama.toFixed(2) %> TL</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kişisel Harcamalar -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Kişisel Paylar</h5>
-            </div>
-            <div class="card-body">
-                <div class="list-group">
-                    <% for (const [kisi, tutar] of Object.entries(hesaplamalar.kisiHarcamalari)) { %>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <%= kisi %>
-                            <span class="badge bg-primary rounded-pill"><%= tutar.toFixed(2) %> TL</span>
+                    <div class="card-body">
+                        <div class="detail-row d-flex justify-content-between align-items-center">
+                            <strong>Tutar:</strong>
+                            <span class="badge bg-success large"><%= harcama.tutar.toFixed(2) %> TL</span>
                         </div>
-                    <% } %>
+                        <div class="detail-row d-flex justify-content-between align-items-center">
+                            <strong>Tarih:</strong>
+                            <span><%= harcama.tarih.toLocaleDateString('tr-TR', { 
+                                day: 'numeric', 
+                                month: 'long', 
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) %></span>
+                        </div>
+                        <hr>
+                        <div class="detail-row">
+                            <strong>Ödeyenler:</strong>
+                            <div class="mt-2">
+                                <% harcama.odeyenler.forEach(odeyen => { %>
+                                    <span class="badge bg-primary me-1"><%= odeyen %></span>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <strong>Katılımcılar:</strong>
+                            <div class="mt-2">
+                                <% harcama.katilimcilar.forEach(katilimci => { %>
+                                    <span class="badge bg-info me-1"><%= katilimci %></span>
+                                <% }); %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Özet Bilgiler -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Özet</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="detail-row d-flex justify-content-between align-items-center">
+                            <span>Kişi Başı Düşen:</span>
+                            <strong><%= hesaplamalar.kisiBasiHarcama.toFixed(2) %> TL</strong>
+                        </div>
+                        <div class="detail-row d-flex justify-content-between align-items-center">
+                            <span>Ödeyen Başı Düşen:</span>
+                            <strong><%= hesaplamalar.odeyenBasiHarcama.toFixed(2) %> TL</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Borç Durumu -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Borç Durumu</h5>
-            </div>
-            <div class="card-body">
-                <% if (hesaplamalar.borclar.length === 0) { %>
-                    <p class="text-muted mb-0">Bu harcama için borç bulunmamaktadır.</p>
-                <% } else { %>
-                    <div class="list-group">
-                        <% hesaplamalar.borclar.forEach(borc => { %>
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span><%= borc.alici %> ➜ <%= borc.verici %></span>
-                                    <span class="badge bg-danger rounded-pill"><%= borc.miktar.toFixed(2) %> TL</span>
-                                </div>
-                            </div>
-                        <% }); %>
+            <!-- Sağ Kolon -->
+            <div class="col-md-6">
+                <!-- Borç Durumu -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Borç Durumu</h5>
                     </div>
-                <% } %>
+                    <div class="card-body">
+                        <% if (hesaplamalar.borclar.length === 0) { %>
+                            <p class="text-muted mb-0">Bu harcama için borç bulunmamaktadır.</p>
+                        <% } else { %>
+                            <div class="list-group">
+                                <% hesaplamalar.borclar.forEach(borc => { %>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-secondary me-2"><%= borc.alici %></span>
+                                                <i class="fas fa-arrow-right"></i>
+                                                <span class="badge bg-primary ms-2"><%= borc.verici %></span>
+                                            </div>
+                                            <span class="badge bg-danger"><%= borc.miktar.toFixed(2) %> TL</span>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- İstatistikler -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">İstatistikler</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="detail-row">
+                            <strong>Katılımcı Sayısı:</strong> <%= harcama.katilimcilar.length %>
+                        </div>
+                        <div class="detail-row">
+                            <strong>Ödeyen Sayısı:</strong> <%= harcama.odeyenler.length %>
+                        </div>
+                        <div class="detail-row">
+                            <strong>Borç İşlemi Sayısı:</strong> <%= hesaplamalar.borclar.length %>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </body>
 </html> 
