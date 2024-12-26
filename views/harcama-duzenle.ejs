@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harcama Düzenle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Harcama Düzenle</h5>
+                        <a href="/" class="btn btn-outline-secondary btn-sm">Geri Dön</a>
+                    </div>
+                    <div class="card-body">
+                        <form action="/harcama-guncelle/<%= harcamaId %>" method="POST">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Harcamayı Yapanlar</label>
+                                <div class="border rounded p-3">
+                                    <% kisiler.forEach(kisi => { %>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="kisi" value="<%= kisi %>" 
+                                                   id="odeyenKisi<%= kisi %>"
+                                                   <%= harcama.odeyenler.includes(kisi) ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="odeyenKisi<%= kisi %>">
+                                                <%= kisi %>
+                                            </label>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Harcamaya Katılacaklar</label>
+                                <div class="border rounded p-3">
+                                    <% kisiler.forEach(kisi => { %>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="katilimcilar" value="<%= kisi %>" 
+                                                   id="kisi<%= kisi %>"
+                                                   <%= harcama.katilimcilar.includes(kisi) ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="kisi<%= kisi %>">
+                                                <%= kisi %>
+                                            </label>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Açıklama</label>
+                                <input type="text" name="aciklama" class="form-control" 
+                                       value="<%= harcama.aciklama %>" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Tutar</label>
+                                <input type="number" name="tutar" step="0.01" class="form-control" 
+                                       value="<%= harcama.tutar %>" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Güncelle</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

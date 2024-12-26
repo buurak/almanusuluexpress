@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harcama Detayı</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card { margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Harcama Detayı</h1>
+            <div>
+                <a href="/" class="btn btn-outline-secondary me-2">Geri Dön</a>
+                <a href="/harcama-duzenle/<%= harcamaId %>" class="btn btn-primary">Düzenle</a>
+            </div>
+        </div>
+
+        <!-- Harcama Bilgileri -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Harcama Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Açıklama:</strong> <%= harcama.aciklama %></p>
+                        <p><strong>Tutar:</strong> <%= harcama.tutar.toFixed(2) %> TL</p>
+                        <p><strong>Tarih:</strong> <%= harcama.tarih.toLocaleDateString() %></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Ödeyenler:</strong> <%= harcama.odeyenler.join(', ') %></p>
+                        <p><strong>Katılımcılar:</strong> <%= harcama.katilimcilar.join(', ') %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Özet -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Özet</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Toplam Harcama:</span>
+                    <strong><%= hesaplamalar.toplamHarcama.toFixed(2) %> TL</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Kişi Başı Harcama:</span>
+                    <strong><%= hesaplamalar.kisiBasiHarcama.toFixed(2) %> TL</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kişisel Harcamalar -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Kişisel Paylar</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <% for (const [kisi, tutar] of Object.entries(hesaplamalar.kisiHarcamalari)) { %>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <%= kisi %>
+                            <span class="badge bg-primary rounded-pill"><%= tutar.toFixed(2) %> TL</span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Borç Durumu -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Borç Durumu</h5>
+            </div>
+            <div class="card-body">
+                <% if (hesaplamalar.borclar.length === 0) { %>
+                    <p class="text-muted mb-0">Bu harcama için borç bulunmamaktadır.</p>
+                <% } else { %>
+                    <div class="list-group">
+                        <% hesaplamalar.borclar.forEach(borc => { %>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><%= borc.alici %> ➜ <%= borc.verici %></span>
+                                    <span class="badge bg-danger rounded-pill"><%= borc.miktar.toFixed(2) %> TL</span>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
